@@ -1,0 +1,6 @@
+from app.api import auth, flights, luggage
+
+api_router = APIRouter()
+api_router.include_router(auth.router)
+api_router.include_router(flights.router)
+api_router.include_router(luggage.router)

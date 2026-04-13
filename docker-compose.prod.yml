@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flytrack-db-prod
+    environment:
+      POSTGRES_USER: flytrack
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: flytrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flytrack-backend-prod
+    environment:
+      - DATABASE_URL=postgresql://flytrack:${DB_PASSWORD}@postgres:5432/flytrack
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=false
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: flytrack-frontend-prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
