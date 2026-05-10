@@ -120,10 +120,9 @@ tasks:
       - docker build -t flytrack-backend:latest .
 
   build:frontend:
-    desc: Build frontend for production
-    dir: "{{.FRONTEND_DIR}}"
+    desc: Build frontend Docker image
     cmds:
-      - ng build --configuration=production
+      - docker build -t flytrack-frontend:latest ./frontend
 
   # ============================================
   # TEST & QUALITY
