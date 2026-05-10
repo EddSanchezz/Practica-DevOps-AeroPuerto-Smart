@@ -326,7 +326,9 @@ export class FlightListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('[FlightList] ngOnInit called');
     this.route.queryParams.subscribe(params => {
+      console.log('[FlightList] Query params:', params);
       if (params['q']) {
         this.searchQuery = params['q'];
         this.searchFlights();
@@ -337,14 +339,17 @@ export class FlightListComponent implements OnInit {
   }
 
   loadFlights() {
+    console.log('[FlightList] loadFlights called');
     this.loading = true;
     this.error = '';
     this.flightService.getFlights().subscribe({
       next: (data) => {
-        this.flights = data;
+        console.log('[FlightList] Flights loaded:', data?.length || 0);
+        this.flights = data || [];
         this.loading = false;
       },
       error: (err) => {
+        console.error('[FlightList] Error loading flights:', err);
         this.error = 'Error al cargar los vuelos';
         this.loading = false;
       }
@@ -352,6 +357,7 @@ export class FlightListComponent implements OnInit {
   }
 
   searchFlights() {
+    console.log('[FlightList] searchFlights called:', this.searchQuery);
     if (!this.searchQuery.trim()) {
       this.activeFilter = 'all';
       this.loadFlights();
@@ -362,10 +368,12 @@ export class FlightListComponent implements OnInit {
     this.error = '';
     this.flightService.searchFlights(this.searchQuery).subscribe({
       next: (data) => {
-        this.flights = data;
+        console.log('[FlightList] Search results:', data?.length || 0);
+        this.flights = data || [];
         this.loading = false;
       },
       error: (err) => {
+        console.error('[FlightList] Error searching flights:', err);
         this.error = 'Error en la búsqueda';
         this.loading = false;
       }
