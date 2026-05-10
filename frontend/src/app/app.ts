@@ -24,7 +24,8 @@ import { AuthService } from './services/auth.service';
             <a routerLink="/register" class="nav-link btn-register">Registrarse</a>
           </ng-container>
           <ng-container *ngIf="authService.isAuthenticated()">
-            <span class="user-info">Hola, {{ authService.getUsername() }}</span>
+            <span class="notification-bell" title="Notificaciones">🔔<span class="notification-badge">3</span></span>
+            <span class="user-info">Hola, <strong>{{ authService.getUsername() }}</strong></span>
             <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
           </ng-container>
         </nav>
@@ -46,13 +47,16 @@ import { AuthService } from './services/auth.service';
     .logo-link { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: white; }
     .plane-icon { font-size: 2rem; }
     .logo h1 { font-size: 1.5rem; font-weight: 600; }
-    .nav { display: flex; gap: 1.5rem; align-items: center; }
-    .nav-link { color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background 0.3s; }
+    .nav { display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .nav-link { color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background 0.3s; white-space: nowrap; }
     .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.2); }
     .btn-register { background: #ff6b35; }
     .btn-register:hover { background: #e55a2b; }
-    .user-info { color: #ddd; margin-right: 0.5rem; }
-    .logout-btn { padding: 0.5rem 1rem; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+    .user-info { color: #fff; font-size: 0.95rem; white-space: nowrap; }
+    .user-info strong { font-weight: 600; }
+    .notification-bell { position: relative; font-size: 1.2rem; cursor: pointer; margin-right: 0.5rem; }
+    .notification-badge { position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 10px; font-weight: bold; }
+    .logout-btn { padding: 0.5rem 1rem; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s; white-space: nowrap; }
     .logout-btn:hover { background: rgba(255,255,255,0.3); }
     .main-content { flex: 1; }
     .footer { background: #1e3c72; color: white; text-align: center; padding: 1.5rem; }
