@@ -1,0 +1,308 @@
+version: '3'
+
+vars:
+  BACKEND_DIR: backend
+  FRONTEND_DIR: frontend
+  COMPOSE_FILE: docker-compose.yml
+
+tasks:
+  # ============================================
+  # DEFAULT - Show help
+  # ============================================
+  default:
+    desc: Show available tasks
+    cmds:
+      - task: list
+
+  list:
+    desc: List all available tasks
+    cmds:
+      - |
+        echo "======================================"
+        echo "  FlyTrack - Available Tasks"
+        echo "======================================"
+        echo ""
+        echo "RUN (Development):"
+        echo "  task run           - Start all services (Docker)"
+        echo "  task run:backend   - Start backend only"
+        echo "  task run:frontend - Start frontend only"
+        echo "  task run:db       - Start database only"
+        echo "  task db:stop      - Stop database"
+        echo ""
+        echo "BUILD:"
+        echo "  task build        - Build everything"
+        echo "  task build:backend - Build backend Docker"
+        echo "  task build:frontend - Build frontend"
+        echo ""
+        echo "TEST & QUALITY:"
+        echo "  task test         - Run all tests"
+        echo "  task test:backend - Run backend tests"
+        echo "  task lint         - Run linters"
+        echo ""
+        echo "DOCKER:"
+        echo "  task docker:up    - Docker compose up"
+        echo "  task docker:down  - Docker compose down"
+        echo "  task docker:prod  - Production mode"
+        echo ""
+        echo "SETUP:"
+        echo "  task install      - Install all dependencies"
+        echo "  task install:backend - Install backend deps"
+        echo "  task install:frontend - Install frontend deps"
+        echo "  task seed         - Seed database with demo data"
+        echo "  task clean        - Clean temporary files"
+        echo "  task reset       - Reset database data"
+        echo ""
+
+  # ============================================
+  # RUN - Development servers
+  # ============================================
+  run:
+    desc: Start all services with Docker Compose
+    cmds:
+      - docker-compose up -d
+    status:
+      - docker ps --filter "name=flytrack" --format "{{.Names}}"
+    cmds_post:
+      - |
+        echo ""
+        echo "======================================"
+        echo "  Servicios iniciados"
+        echo "======================================"
+        echo ""
+        echo "  🌐 Frontend:  http://localhost:80"
+        echo "  📚 API:       http://localhost:8000"
+        echo "  📖 Swagger:   http://localhost:8000/docs"
+        echo "  🗄️  Database: localhost:5432"
+        echo ""
+        echo "  Para ver logs: task logs:all"
+        echo "  Para detener:  task docker:down"
+        echo ""
+
+  run:backend:
+    desc: Start backend development server
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    cmds_post:
+      - |
+        echo ""
+        echo "  📚 Backend iniciado en: http://localhost:8000"
+        echo "  📖 Swagger disponible en: http://localhost:8000/docs"
+        echo ""
+
+  run:frontend:
+    desc: Start frontend development server
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - ng serve --host 0.0.0.0 --port 4200
+    cmds_post:
+      - |
+        echo ""
+        echo "  🌐 Frontend iniciado en: http://localhost:4200"
+        echo ""
+
+  run:db:
+    desc: Start PostgreSQL database in Docker
+    cmds:
+      - docker run -d --name flytrack-db --network flytrack-network -e POSTGRES_USER=flytrack -e POSTGRES_PASSWORD=flytrack -e POSTGRES_DB=flytrack -p 5432:5432 postgres:16-alpine
+    cmds_post:
+      - |
+        echo ""
+        echo "  🗄️  Base de datos iniciada en: localhost:5432"
+        echo "      Usuario: flytrack"
+        echo "      Contraseña: flytrack"
+        echo "      Base de datos: flytrack"
+        echo ""
+
+  db:stop:
+    desc: Stop and remove database container
+    cmds:
+      - docker stop flytrack-db 2>/dev/null || true
+      - docker rm flytrack-db 2>/dev/null || true
+
+  # ============================================
+  # BUILD
+  # ============================================
+  build:
+    desc: Build everything (backend + frontend)
+    cmds:
+      - task: build:backend
+      - task: build:frontend
+
+  build:backend:
+    desc: Build backend Docker image
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - docker build -t flytrack-backend:latest .
+
+  build:frontend:
+    desc: Build frontend for production
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - ng build --configuration=production
+
+  # ============================================
+  # TEST & QUALITY
+  # ============================================
+  test:
+    desc: Run all tests
+    cmds:
+      - task: test:backend
+
+  test:backend:
+    desc: Run backend tests with pytest
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
+
+  test:backend:watch:
+    desc: Run backend tests in watch mode
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - pytest tests/ -v --cov=app --watch
+
+  lint:
+    desc: Run linters (Flake8 + Black)
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - flake8 app/ --max-line-length=120 --ignore=E501,W503
+      - black --check app/
+
+  lint:frontend:
+    desc: Run frontend linter
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - ng lint || true
+
+  # ============================================
+  # DOCKER
+  # ============================================
+  docker:up:
+    desc: Start Docker Compose (development)
+    cmds:
+      - docker-compose up -d
+    status:
+      - docker ps --filter "name=flytrack" --format "{{.Names}}"
+    cmds_post:
+      - |
+        echo ""
+        echo "======================================"
+        echo "  Docker Compose iniciado"
+        echo "======================================"
+        echo ""
+        echo "  🌐 Frontend:  http://localhost:80"
+        echo "  📚 API:       http://localhost:8000"
+        echo "  📖 Swagger:   http://localhost:8000/docs"
+        echo "  🗄️  Database: localhost:5432"
+        echo ""
+
+  docker:down:
+    desc: Stop Docker Compose
+    cmds:
+      - docker-compose down
+
+  docker:build:
+    desc: Build Docker images without running
+    cmds:
+      - docker-compose build
+
+  docker:prod:
+    desc: Start production environment
+    cmds:
+      - docker-compose -f docker-compose.prod.yml up -d
+    status:
+      - docker ps --filter "name=flytrack" --format "{{.Names}}"
+
+  docker:prod:down:
+    desc: Stop production environment
+    cmds:
+      - docker-compose -f docker-compose.prod.yml down
+
+  docker:clean:
+    desc: Remove all containers and volumes
+    cmds:
+      - docker-compose down -v
+      - docker system prune -f
+
+  # ============================================
+  # SETUP - Installation & Maintenance
+  # ============================================
+  install:
+    desc: Install all dependencies (backend + frontend)
+    cmds:
+      - task: install:backend
+      - task: install:frontend
+
+  install:backend:
+    desc: Install backend dependencies
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - pip install -r requirements.txt
+      - pip install flake8 black pytest-cov
+
+  install:frontend:
+    desc: Install frontend dependencies
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - npm install
+
+  seed:
+    desc: Seed database with demo data
+    cmds:
+      - curl -X POST http://localhost:8000/api/seed/ || echo "Backend must be running"
+
+  seed:status:
+    desc: Check seed data status
+    cmds:
+      - curl -s http://localhost:8000/api/seed/status || echo "Backend must be running"
+
+  reset:
+    desc: Reset database (delete all data)
+    cmds:
+      - curl -X DELETE http://localhost:8000/api/seed/reset/ || echo "Backend must be running"
+
+  clean:
+    desc: Clean temporary files and caches
+    cmds:
+      - powershell -Command "Get-ChildItem -Path . -Include __pycache__,.pytest_cache,coverage.xml,.coverage -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue"
+      - powershell -Command "Get-ChildItem -Path . -Include *.pyc,*.pyo -Recurse -File | Remove-Item -Force -ErrorAction SilentlyContinue"
+      - powershell -Command "if (Test-Path frontend/dist) { Remove-Item -Recurse -Force frontend/dist }"
+      - powershell -Command "if (Test-Path backend/htmlcov) { Remove-Item -Recurse -Force backend/htmlcov }"
+
+  # ============================================
+  # HEALTH CHECKS
+  # ============================================
+  health:
+    desc: Check health of all services
+    cmds:
+      - |
+        echo "Checking services..."
+        echo ""
+        echo "Backend:"
+        curl -s http://localhost:8000/health || echo "  ❌ Not running"
+        echo ""
+        echo "Frontend:"
+        curl -s -o /dev/null -w "%{http_code}" http://localhost:80 || echo "  ❌ Not running"
+        echo ""
+        echo "Database:"
+        docker ps --filter "name=flytrack-db" --format "{{.Names}}: {{.Status}}" || echo "  ❌ Not running"
+
+  logs:backend:
+    desc: View backend logs
+    cmds:
+      - docker logs -f flytrack-backend
+
+  logs:frontend:
+    desc: View frontend logs
+    cmds:
+      - docker logs -f flytrack-frontend
+
+  logs:db:
+    desc: View database logs
+    cmds:
+      - docker logs -f flytrack-db
+
+  logs:all:
+    desc: View all logs
+    cmds:
+      - docker-compose logs -f

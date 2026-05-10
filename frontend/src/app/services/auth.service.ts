@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
@@ -59,8 +59,17 @@ export class AuthService {
     localStorage.setItem('access_token', token);
   }
 
+  getUsername(): string | null {
+    return localStorage.getItem('username');
+  }
+
+  setUsername(username: string): void {
+    localStorage.setItem('username', username);
+  }
+
   removeToken(): void {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('username');
   }
 
   isAuthenticated(): boolean {

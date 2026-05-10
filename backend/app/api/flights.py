@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.core.database import get_db
 from app.schemas.flight import (
     FlightCreate,
@@ -17,6 +17,25 @@ router = APIRouter(prefix="/flights", tags=["Flights"])
 @router.get("/", response_model=List[FlightResponse])
 def get_flights(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     flights = db.query(Flight).offset(skip).limit(limit).all()
+    return flights
+
+
+@router.get("/search", response_model=List[FlightResponse])
+def search_flights(
+    q: Optional[str] = Query(None, description="Search by flight number, origin or destination"),
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Flight)
+    if q:
+        search_term = f"%{q}%"
+        query = query.filter(
+            (Flight.flight_number.ilike(search_term)) |
+            (Flight.origin.ilike(search_term)) |
+            (Flight.destination.ilike(search_term))
+        )
+    flights = query.offset(skip).limit(limit).all()
     return flights
 
 
@@ -56,3 +75,17 @@ def update_flight(
     db.commit()
     db.refresh(db_flight)
     return db_flight
+
+
+@router.delete("/{flight_id}")
+def delete_flight(
+    flight_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    db_flight = db.query(Flight).filter(Flight.id == flight_id).first()
+    if not db_flight:
+        raise HTTPException(status_code=404, detail="Flight not found")
+    db.delete(db_flight)
+    db.commit()
+    return {"message": "Flight deleted successfully"}

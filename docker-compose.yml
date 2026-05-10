@@ -17,6 +17,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - flytrack-network
 
   backend:
     build:
@@ -35,6 +37,8 @@ services:
     volumes:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - flytrack-network
 
   frontend:
     build:
@@ -45,6 +49,11 @@ services:
       - "80:80"
     depends_on:
       - backend
+    networks:
+      - flytrack-network
+
+networks:
+  flytrack-network:
 
 volumes:
   postgres_data:

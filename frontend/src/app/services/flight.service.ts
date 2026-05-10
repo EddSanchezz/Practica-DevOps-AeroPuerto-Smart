@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface Flight {
   id: number;
@@ -44,6 +44,10 @@ export class FlightService {
     return this.http.get<Flight[]>(`${this.apiUrl}/flights/`);
   }
 
+  searchFlights(query: string): Observable<Flight[]> {
+    return this.http.get<Flight[]>(`${this.apiUrl}/flights/search?q=${encodeURIComponent(query)}`);
+  }
+
   getFlight(id: number): Observable<Flight> {
     return this.http.get<Flight>(`${this.apiUrl}/flights/${id}`);
   }
@@ -54,5 +58,9 @@ export class FlightService {
 
   updateFlight(id: number, flight: FlightCreate): Observable<Flight> {
     return this.http.put<Flight>(`${this.apiUrl}/flights/${id}`, flight, { headers: this.getHeaders() });
+  }
+
+  deleteFlight(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/flights/${id}`, { headers: this.getHeaders() });
   }
 }
