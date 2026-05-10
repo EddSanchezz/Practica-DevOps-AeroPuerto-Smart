@@ -42,13 +42,13 @@ export class AuthService {
     body.set('username', credentials.username);
     body.set('password', credentials.password);
     
-    return this.http.post<TokenResponse>(`${this.apiUrl}/auth/login`, body.toString(), {
+    return this.http.post<TokenResponse>(`${this.apiUrl}/api/auth/login`, body.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     });
   }
 
   register(user: RegisterRequest): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/auth/register`, user);
+    return this.http.post<User>(`${this.apiUrl}/api/auth/register`, user);
   }
 
   getToken(): string | null {
