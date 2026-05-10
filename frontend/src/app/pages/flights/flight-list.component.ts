@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { FlightService, Flight } from '../../services/flight.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -272,12 +273,13 @@ import { AuthService } from '../../services/auth.service';
     }
   `]
 })
-export class FlightListComponent implements OnInit {
+export class FlightListComponent implements OnInit, OnDestroy {
   flights: Flight[] = [];
   searchQuery = '';
   loading = false;
   error = '';
   activeFilter = 'all';
+  private queryParamsSub?: Subscription;
 
   get totalFlights(): number { return this.flights.length; }
   get boardingCount(): number { return this.flights.filter(f => f.status === 'boarding').length; }
@@ -327,7 +329,7 @@ export class FlightListComponent implements OnInit {
 
   ngOnInit() {
     console.log('[FlightList] ngOnInit called');
-    this.route.queryParams.subscribe(params => {
+    this.queryParamsSub = this.route.queryParams.subscribe(params => {
       console.log('[FlightList] Query params:', params);
       if (params['q']) {
         this.searchQuery = params['q'];
@@ -336,6 +338,15 @@ export class FlightListComponent implements OnInit {
         this.loadFlights();
       }
     });
+  }
+
+  ngOnDestroy() {
+    console.log('[FlightList] ngOnDestroy - cleaning up');
+    if (this.queryParamsSub) {
+      this.queryParamsSub.unsubscribe();
+    }
+    this.loading = false;
+    this.error = '';
   }
 
   loadFlights() {

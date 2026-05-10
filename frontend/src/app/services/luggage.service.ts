@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface LuggageReport {
@@ -23,6 +23,7 @@ export interface LuggageReportCreate {
 })
 export class LuggageService {
   private apiUrl = environment.apiUrl;
+  private timeoutMs = 15000;
 
   constructor(private http: HttpClient) {}
 
@@ -34,11 +35,11 @@ export class LuggageService {
   }
 
   getReports(): Observable<LuggageReport[]> {
-    return this.http.get<LuggageReport[]>(`${this.apiUrl}/luggage/`);
+    return this.http.get<LuggageReport[]>(`${this.apiUrl}/luggage/`).pipe(timeout(this.timeoutMs));
   }
 
   getReport(id: number): Observable<LuggageReport> {
-    return this.http.get<LuggageReport>(`${this.apiUrl}/luggage/${id}`);
+    return this.http.get<LuggageReport>(`${this.apiUrl}/luggage/${id}`).pipe(timeout(this.timeoutMs));
   }
 
   createReport(report: LuggageReportCreate): Observable<LuggageReport> {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Flight {
@@ -30,6 +30,7 @@ export interface FlightCreate {
 })
 export class FlightService {
   private apiUrl = environment.apiUrl;
+  private timeoutMs = 15000;
 
   constructor(private http: HttpClient) {}
 
@@ -41,15 +42,15 @@ export class FlightService {
   }
 
   getFlights(): Observable<Flight[]> {
-    return this.http.get<Flight[]>(`${this.apiUrl}/flights/`);
+    return this.http.get<Flight[]>(`${this.apiUrl}/flights/`).pipe(timeout(this.timeoutMs));
   }
 
   searchFlights(query: string): Observable<Flight[]> {
-    return this.http.get<Flight[]>(`${this.apiUrl}/flights/search?q=${encodeURIComponent(query)}`);
+    return this.http.get<Flight[]>(`${this.apiUrl}/flights/search?q=${encodeURIComponent(query)}`).pipe(timeout(this.timeoutMs));
   }
 
   getFlight(id: number): Observable<Flight> {
-    return this.http.get<Flight>(`${this.apiUrl}/flights/${id}`);
+    return this.http.get<Flight>(`${this.apiUrl}/flights/${id}`).pipe(timeout(this.timeoutMs));
   }
 
   createFlight(flight: FlightCreate): Observable<Flight> {
