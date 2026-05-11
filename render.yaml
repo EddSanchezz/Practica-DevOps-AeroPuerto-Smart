@@ -19,6 +19,7 @@ services:
   - type: web
     name: flytrack-frontend
     runtime: static
+    rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist/flytrack/browser
     headers:
