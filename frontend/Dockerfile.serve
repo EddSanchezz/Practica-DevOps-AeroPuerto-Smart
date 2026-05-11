@@ -1,0 +1,16 @@
+# Imagen para Render (Web Service): sirve el build de Angular con fallback SPA.
+# "serve -s" equivale a try_files → index.html (rutas /login, /flights, etc.).
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+RUN npm install -g serve@14
+WORKDIR /srv
+COPY --from=builder /app/dist/flytrack/browser ./
+EXPOSE 3000
+# Render inyecta PORT; escuchar en todas las interfaces
+CMD ["sh", "-c", "serve -s . -l tcp://0.0.0.0:${PORT:-3000}"]
