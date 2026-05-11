@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LuggageService, LuggageReport, LuggageReportCreate } from '../../services/luggage.service';
@@ -242,7 +242,8 @@ export class LuggageComponent implements OnInit {
 
   constructor(
     private luggageService: LuggageService,
-    public authService: AuthService
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -255,10 +256,12 @@ export class LuggageComponent implements OnInit {
       next: (data) => {
         this.reports = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar los reportes';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -277,25 +280,27 @@ export class LuggageComponent implements OnInit {
         this.newReport = { passenger_name: '', passenger_document: '', description: '' };
         this.loadReports();
         this.reporting = false;
-        setTimeout(() => this.reportSuccess = false, 3000);
+        this.cdr.detectChanges();
+        setTimeout(() => { this.reportSuccess = false; this.cdr.detectChanges(); }, 3000);
       },
       error: () => {
         this.error = 'Error al enviar el reporte';
         this.reporting = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   updateStatus(id: number, status: string) {
     this.luggageService.updateReportStatus(id, status).subscribe({
-      next: () => this.loadReports()
+      next: () => { this.loadReports(); this.cdr.detectChanges(); }
     });
   }
 
   deleteReport(id: number) {
     if (confirm('¿Eliminar este reporte?')) {
       this.luggageService.deleteReport(id).subscribe({
-        next: () => this.loadReports()
+        next: () => { this.loadReports(); this.cdr.detectChanges(); }
       });
     }
   }

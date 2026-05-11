@@ -23,7 +23,7 @@ export interface LuggageReportCreate {
 })
 export class LuggageService {
   private apiUrl = environment.apiUrl;
-  private timeoutMs = 15000;
+  private timeoutMs = 5000;
 
   constructor(private http: HttpClient) {}
 
@@ -36,24 +36,24 @@ export class LuggageService {
 
   getReports(): Observable<LuggageReport[]> {
     return this.http
-      .get<LuggageReport[]>(`${this.apiUrl}/api/luggage/`)
+      .get<LuggageReport[]>(`${this.apiUrl}/luggage/`)
       .pipe(timeout(this.timeoutMs));
   }
   
   getReport(id: number): Observable<LuggageReport> {
     return this.http
-      .get<LuggageReport>(`${this.apiUrl}/api/luggage/${id}`)
+      .get<LuggageReport>(`${this.apiUrl}/luggage/${id}`)
       .pipe(timeout(this.timeoutMs));
   }
 
   createReport(report: LuggageReportCreate): Observable<LuggageReport> {
-    return this.http.post<LuggageReport>(`${this.apiUrl}/api/luggage/`, report);
+    return this.http.post<LuggageReport>(`${this.apiUrl}/luggage/`, report);
   }
 
   updateReportStatus(id: number, status: string): Observable<LuggageReport> {
     const token = localStorage.getItem('access_token');
     return this.http.put<LuggageReport>(
-      `${this.apiUrl}/api/luggage/${id}?status=${status}`,
+      `${this.apiUrl}/luggage/${id}?status=${status}`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -62,6 +62,6 @@ export class LuggageService {
   }
 
   deleteReport(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/api/luggage/${id}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.apiUrl}/luggage/${id}`, { headers: this.getHeaders() });
   }
 }

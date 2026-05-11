@@ -15,13 +15,16 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     CORS_ORIGINS: list[str] = [
         "http://localhost",
         "http://localhost:80",
+        "http://localhost:4200",
         "http://127.0.0.1",
         "http://127.0.0.1:80",
+        "http://127.0.0.1:4200",
     ]
-    CORS_ALLOW_CREDENTIALS: bool = False
+    CORS_ALLOW_CREDENTIALS: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
@@ -32,8 +35,6 @@ class Settings(BaseSettings):
             value = value.strip()
             if not value:
                 return []
-            if value.startswith("["):
-                return value
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 

@@ -30,7 +30,7 @@ export interface FlightCreate {
 })
 export class FlightService {
   private apiUrl = environment.apiUrl;
-  private timeoutMs = 15000;
+  private timeoutMs = 5000;
 
   constructor(private http: HttpClient) {}
 
@@ -43,37 +43,37 @@ export class FlightService {
 
   getFlights(): Observable<Flight[]> {
     return this.http
-      .get<Flight[]>(`${this.apiUrl}/api/flights/`)
+      .get<Flight[]>(`${this.apiUrl}/flights/`)
       .pipe(timeout(this.timeoutMs));
   }
   
   searchFlights(query: string): Observable<Flight[]> {
     return this.http
       .get<Flight[]>(
-        `${this.apiUrl}/api/flights/search?q=${encodeURIComponent(query)}`
+        `${this.apiUrl}/flights/search?q=${encodeURIComponent(query)}`
       )
       .pipe(timeout(this.timeoutMs));
   }
   
   getFlight(id: number): Observable<Flight> {
     return this.http
-      .get<Flight>(`${this.apiUrl}/api/flights/${id}`)
+      .get<Flight>(`${this.apiUrl}/flights/${id}`)
       .pipe(timeout(this.timeoutMs));
   }
 
   createFlight(flight: FlightCreate): Observable<Flight> {
-    return this.http.post<Flight>(`${this.apiUrl}/api/flights/`, flight, {
+    return this.http.post<Flight>(`${this.apiUrl}/flights/`, flight, {
       headers: this.getHeaders(),
     });
   }
 
   updateFlight(id: number, flight: FlightCreate): Observable<Flight> {
-    return this.http.put<Flight>(`${this.apiUrl}/api/flights/${id}`, flight, {
+    return this.http.put<Flight>(`${this.apiUrl}/flights/${id}`, flight, {
       headers: this.getHeaders(),
     });
   }
 
   deleteFlight(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/api/flights/${id}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.apiUrl}/flights/${id}`, { headers: this.getHeaders() });
   }
 }
