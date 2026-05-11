@@ -77,6 +77,7 @@ docker-compose up -d
 DATABASE_URL=postgresql://flytrack:flytrack@localhost:5432/flytrack
 SECRET_KEY=your-secret-key
 DEBUG=true
+CORS_ORIGINS=http://localhost,http://127.0.0.1,https://tu-frontend-en-produccion.com
 ```
 
 ## Endpoints API
