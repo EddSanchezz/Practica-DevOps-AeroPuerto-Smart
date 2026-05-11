@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FlightService, Flight } from '../../services/flight.service';
@@ -57,7 +57,9 @@ import { AuthService } from '../../services/auth.service';
         </div>
 
         <div *ngIf="authService.isAuthenticated()" class="flight-actions">
-          <button class="delete-btn" (click)="deleteFlight()">Eliminar Vuelo</button>
+          <button class="delete-btn" [disabled]="deleting" (click)="deleteFlight()">
+            {{ deleting ? 'Eliminando...' : 'Eliminar Vuelo' }}
+          </button>
         </div>
       </div>
     </div>
@@ -93,18 +95,21 @@ import { AuthService } from '../../services/auth.service';
     .flight-actions { display: flex; gap: 1rem; justify-content: flex-end; }
     .delete-btn { padding: 0.8rem 1.5rem; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .delete-btn:hover { background: #c0392b; }
+    .delete-btn:disabled { background: #999; cursor: not-allowed; }
   `]
 })
 export class FlightDetailComponent implements OnInit {
   flight: Flight | null = null;
   loading = false;
+  deleting = false;
   error = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private flightService: FlightService,
-    public authService: AuthService
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -121,10 +126,12 @@ export class FlightDetailComponent implements OnInit {
       next: (data) => {
         this.flight = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Error al cargar los detalles del vuelo';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -156,14 +163,18 @@ export class FlightDetailComponent implements OnInit {
   }
 
   deleteFlight() {
-    if (!this.flight) return;
+    if (this.deleting || !this.flight) return;
     if (confirm('¿Estás seguro de eliminar este vuelo?')) {
+      this.deleting = true;
+      this.cdr.detectChanges();
       this.flightService.deleteFlight(this.flight.id).subscribe({
         next: () => {
           this.router.navigate(['/flights']);
         },
         error: () => {
           this.error = 'Error al eliminar el vuelo';
+          this.deleting = false;
+          this.cdr.detectChanges();
         }
       });
     }

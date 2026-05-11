@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from functools import lru_cache
 
 
@@ -13,9 +14,27 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    CORS_ORIGINS: list[str] = [
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:4200",
+        "http://127.0.0.1",
+        "http://127.0.0.1:80",
+        "http://127.0.0.1:4200",
+    ]
+    CORS_ALLOW_CREDENTIALS: bool = True
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def split_cors_origins(cls, v):
+        if isinstance(v, str):
+            return [item.strip() for item in v.split(",")]
+        return v
+
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+    }
 
 
 @lru_cache()

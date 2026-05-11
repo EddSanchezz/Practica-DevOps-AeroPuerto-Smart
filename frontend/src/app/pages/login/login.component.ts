@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -62,7 +62,11 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   onLogin() {
     if (!this.username || !this.password) {
@@ -77,11 +81,14 @@ export class LoginComponent {
       next: (response) => {
         this.authService.setToken(response.access_token);
         this.authService.setUsername(this.username);
+        this.loading = false;
+        this.cdr.detectChanges();
         this.router.navigate(['/flights']);
       },
       error: (err) => {
         this.error = err.error?.detail || 'Error al iniciar sesión';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -111,7 +111,11 @@ export class FlightNewComponent {
   error = '';
   success = '';
 
-  constructor(private flightService: FlightService, private router: Router) {}
+  constructor(
+    private flightService: FlightService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   onSubmit() {
     if (!this.flight.flight_number || !this.flight.origin || !this.flight.destination || 
@@ -127,11 +131,14 @@ export class FlightNewComponent {
     this.flightService.createFlight(this.flight).subscribe({
       next: () => {
         this.success = 'Vuelo creado exitosamente';
+        this.loading = false;
+        this.cdr.detectChanges();
         setTimeout(() => this.router.navigate(['/flights']), 1500);
       },
       error: (err) => {
         this.error = err.error?.detail || 'Error al crear el vuelo';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

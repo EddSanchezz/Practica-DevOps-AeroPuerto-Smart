@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
@@ -324,7 +324,8 @@ export class FlightListComponent implements OnInit, OnDestroy {
   constructor(
     private flightService: FlightService,
     public authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -358,11 +359,13 @@ export class FlightListComponent implements OnInit, OnDestroy {
         console.log('[FlightList] Flights loaded:', data?.length || 0);
         this.flights = data || [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('[FlightList] Error loading flights:', err);
         this.error = 'Error al cargar los vuelos';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -382,11 +385,13 @@ export class FlightListComponent implements OnInit, OnDestroy {
         console.log('[FlightList] Search results:', data?.length || 0);
         this.flights = data || [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('[FlightList] Error searching flights:', err);
         this.error = 'Error en la búsqueda';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
